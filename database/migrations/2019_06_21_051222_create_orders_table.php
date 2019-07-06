@@ -10,7 +10,7 @@ class CreateOrdersTable extends Migration {
 		Schema::create('orders', function(Blueprint $table) {
 			$table->increments('id');
 			$table->timestamps();
-			$table->string('name');
+			$table->string('name'); 
 			$table->integer('age');
 			$table->integer('quantity');
 			$table->string('hospital_name');
@@ -21,7 +21,7 @@ class CreateOrdersTable extends Migration {
 			$table->string('mobile');
 			$table->text('note')->nullable();
 			$table->integer('client_id');
-			$table->integer('blood_type_id');
+			$table->enum('blood_type',array('A+', 'A-','B+','B-','AB+','AB-','O+','O-'));
 		});
 	}
 

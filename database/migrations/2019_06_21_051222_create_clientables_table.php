@@ -12,7 +12,7 @@ class CreateClientablesTable extends Migration {
 			$table->timestamps();
 			$table->integer('client_id');
 			$table->integer('clientable_id');
-			$table->integer('clientable_type');
+			$table->string('clientable_type');
 			$table->boolean('notification_is_read');
 		});
 	}

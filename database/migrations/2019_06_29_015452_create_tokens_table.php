@@ -10,13 +10,13 @@ class CreateTokensTable extends Migration {
 		Schema::create('tokens', function(Blueprint $table) {
 			$table->increments('id');
 			$table->timestamps();
-			$table->string('name');
+			$table->string('token');
 			$table->enum('type', array('android', 'ios'));
 			$table->integer('client_id')->unsigned();
 		});
 	}
 
-	public function down()
+	public function down() 
 	{
 		Schema::drop('tokens');
 	}

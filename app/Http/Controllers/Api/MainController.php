@@ -21,7 +21,7 @@ use App\Models\RequestLog;
 use App\Models\Token;
 use DB;
 
-
+ 
 class MainController extends Controller
 {
     public function logs()
@@ -80,13 +80,14 @@ class MainController extends Controller
             'hospital_name' => 'required',
             'hospital_address' => 'required',
             'city_id' =>'required|exists:cities,id',
+            
             'mobile' => 'required|string|max:15|regex:/[0-9]{10}/|digits:11',     
-        ]);
+        ]); 
         if($validator->fails())
         {
             return responseJson( 0 , $validator->errors()->first() , $validator->errors());
         }
-        $orderRequest = $request ->user()->orders()->create($request->all());//->load('cities.governorates' , 'blood_types'); // relation_name
+        $orderRequest = $request ->user()->orders()->create($request->all());
         
        // dd($orderRequest);
         // find clients suitable for this order request
@@ -95,20 +96,20 @@ class MainController extends Controller
             $q->where('blood_types.name',$orderRequest->blood_type);
         }) -> pluck('clients.id')->toArray();
 
-        // dd($clientsIds);
+         //dd($clientsIds);
        
         if(count($clientsIds))
         {
-            $notification = $orderRequest ->notifications()->creare([
+            $notification = $orderRequest ->notifications()->create([
                 'title' => 'يوجد حالة تبرع قريبه منك ',
-                'content' =>$orderRequest->bloodType . 'محتاج متبرع لفصيله ',
+                'content' =>$orderRequest->blood_type . 'محتاج متبرع لفصيله ',
             ]);
             $notification->clients()->attach($clientsIds);
 
             $tokens = Token::whereIn('client_id' ,$clientsIds)->where('token' , '!=' , null)->pluck('token') ->toArray();
+           // dd($tokens);
              if(count($tokens))
             {
-               // public_path();
                 $title = $notification->title;
                 $body = $notification ->content;
                 $data = [
@@ -116,6 +117,7 @@ class MainController extends Controller
                 ];
                 $send = notifyByFirebase($title , $body , $tokens , $data);
                 info("firebase result: " . $send);
+                dd($send);
             }
         }
         return responseJson( 1 ,  'تم الاضافه بنجاح ' , compact('orderRequest'));
@@ -123,62 +125,76 @@ class MainController extends Controller
 
 
     // donationRequest
-    public function order(Request $request)
+    public function orders(Request $request)
     {
-        $order = Order::where(function($query)use ($request){
-            if($request->input('governorate_id')){
+        $orders = Order::where(function($query)use ($request){
+            if($request->has('governorate_id')){
                 $query->whereHas('cities',function($query)use ($request){
                     $query->where('governorate_id',$request->governorate_id);
                 });
-            }elseif($request->input('city_id')){
+            }elseif($request->has('city_id')){
                 $query->where('city_id',$request->city_id);
             }
-            if($request->input('blood_type_id')){
+
+            if($request->has('blood_type_id')){
                 $query->where('blood_type_id',$request->blood_type_id);
             }
         })->with('cities','clients','blood_types')->latest()->paginate(10);
         
-        return responseJson(1, 'success', $order);
+        return responseJson(1, 'success', $orders);
         
     }
 
  
     // donationRequest
-    public function orders(Request $request)
+    public function order(Request $request)
     {
-        $orders= Order::all();
-        return responseJson( 1 ,  'success' , $orders);
+        $order= Order::with('cities' , 'clients' ,'blood_types')->find($request->order_id);
+
+        if(!$order) {
+            return responseJson( 0 ,  'Your Request Not Found..');
+        }
+
+        if($request->user()->notifications()->where( 'order_id' ,$order->id)->first())
+        {
+            $request->user()->notifications()->updateExistingPivot($order->notification->id , [
+                'notification_is_read' => 1
+                ]);    
+        }
+       
+        return responseJson( 1 ,  'success' , $order);
     }
 
 
     // <------------------ Posts Functions ----------->
     public function posts(Request $request)
     {
-        $posts= Post::with('categories')->paginate(10);
-        // $posts= Post::with('categories')->where(function($post) use($request){
-        //     if($request->input('category_id'))
-        //     {
-        //         $post->where('category_id', $request->category_id);
-        //         $post->whereHas('category' , function($category) use($request){
-        //             $category->where('name' , 'like' , '%' .$request->keyword.'%');
-        //         });
-        //     }
-        //     if($request->input('keyword'))
-        //     {
-        //         $post->where( function($post) use($request){
-        //             $post->where('title', 'like' , '%' .$request->keyword.'%'); 
-        //             $post->orwhere('content', 'like' , '%' .$request->keyword.'%');
-        //         });
-        //     }
-        // })->oldest()->tosql(); //paginate(10)
+      //$posts= Post::with('categories')->paginate(10);
+
+        $posts= Post::with('categories')->where(function($query) use($request){
+            if($request->has('category_id'))
+            {
+                $query->where('category_id', $request->category_id);
+            }
+            if($request->has('keyword'))
+            {
+            $query->where( function($post) use($request){
+               $post->where('title', 'like' , '%' .$request->keyword.'%');
+               $post->orwhere('content', 'like' , '%' .$request->keyword.'%');
+            });
+            }    
+        })->latest()->paginate(10); //
         return responseJson( 1 ,  'success' , $posts);   
     }
 
 
-    public function post($id)
+    public function post(Request $request)
     {
-        $posts= Post::find($id);
-        return responseJson( 1 ,  'success' , $posts);
+        $post= Post::with('categories')->find($request->post_id);
+        if(!$post) {
+            return responseJson( 0 ,  'Your Post Not Found..');
+        }
+        return responseJson( 1 ,  'success' , $post);
     }
 
 
@@ -191,10 +207,10 @@ class MainController extends Controller
 
 
      // toggle-favourite
-    public function postFavourite(Request $request)
+    public function postToggleFavourite(Request $request)
     {
       //  RequestLog::create(['content'=>$request->all() , 'service'=> 'post togge favourite']);
-        $rules = [ 'post_id'=> 'required|exists:post.id', ];
+        $rules = [ 'post_id'=> 'required|exists:posts,id', ];
         $validator = validator()->make($request->all() , $rules); 
         if($validator->fails())
         {
@@ -208,8 +224,8 @@ class MainController extends Controller
     // <------------------ Notifications Functions ----------->
     public function notifications(Request $request)
     {
-        $items = $request->user()->notifications()->latest()->paginate(20);
-        return responseJson( 1 ,  'Loaded...' , $items);   
+        $notifications = $request->user()->notifications()->latest()->paginate(20);
+        return responseJson( 1 ,  'Loaded...' , $notifications);   
     }
 
 
@@ -218,15 +234,8 @@ class MainController extends Controller
         $count = $request->user()->notifications()->where(function($query) use ($request){
             $query ->where('notification_is_read' , 0);
         })->count();
-        return responseJson( 1 ,  'Loaded...' , ['notifications-count' =>$count] );   
+        return responseJson( 1 ,  'Loaded...' , ['notifications-count' =>$count]);   
     }
-
-
-    public function testNotification(Request $request)
-    {
-           
-    }
-
 
     public function settings()
     {
@@ -234,21 +243,14 @@ class MainController extends Controller
     }
 
 
-    public function contacts()
-    {   
-        $contacts= Contacts::all();
-        return responseJson( 1 ,  'success' , $contacts); 
-    }
-
-
-    public function reports(Request $request)
+    public function contactReports(Request $request)
     {
         // send sms to email verified in system 
       //  RequestLog::create(['content' => $request->all() , 'service' =>'contact us']);
         $rules = [
-            'name'=>'required',
-            'email'=>'required',
-            'phone'=>'required',
+            'name'=>'required|string|max:255',
+            'email'=>'required|string|email|max:255',
+            'phone'=>'required|string|max:15|regex:/[0-9]{10}/|digits:11',
             'subject'=>'required|max:100',
             'message'=>'required|min:3|max:1000',
         ];
@@ -257,26 +259,17 @@ class MainController extends Controller
         if($validator->fails()) {
             return responseJson(0, $validator->errors()->first(), $validator->errors());
         }
+        $contact=Contacts::create($request->all());
+        
+        if ($contact){
+             Mail::to("blood.bank740@gmail.com")
+            ->bcc("lamiaagamal4295@gmail.com") ;// mail of manager
+            //->send(new Contacts($contact));
 
-        $user = Client::where('email',$request->email)->first();
-        if($user)
-        {
-            $contact=Contacts::create($request->all());
-            $contact->save();
-            if ($contact){
-                Mail::to("blood.bank740@gmail.com");
-                   // ->send(new Contacts($contact));
-                return responseJson(1, ' Check your mobile ',
-                    [
-                        'message' => $request->message,
-                        'fails_mail' => Mail::failures(),
-                        'email' => $contact->email,
-                    ]);
-            }else{
-                return responseJson(0,  'حدث خطأ , حاول مرة أخرى');
-            }
-        } else {
-        return responseJson(0,  'لا يوجد حساب مطابق للبيانات ');
+            return responseJson(1,  'شكرا على تسجيل شكوتك' , $contact);
+            
+        }else{
+            return responseJson(0,  'حدث خطأ , حاول مرة أخرى');
         }
         
     }

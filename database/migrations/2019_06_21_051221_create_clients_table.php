@@ -16,9 +16,9 @@ class CreateClientsTable extends Migration {
 			$table->date('last_donate');
 			$table->string('mobile');
 			$table->string('password');
-			$table->integer('blood_type_id');
+			$table->enum('blood_type',array('A+', 'A-','B+','B-','AB+','AB-','O+','O-'));
 			$table->integer('city_id');
-			$table->integer('pin_code');
+			$table->integer('pin_code')->unique()->nullable();
 			$table->string('api_token', 60)->unique()->nullable();
 		});
 	}

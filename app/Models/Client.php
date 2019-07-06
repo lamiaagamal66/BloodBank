@@ -19,14 +19,14 @@ class Client extends Authenticatable
         return $this->morphedByMany('App\Models\BloodType', 'clientable');
     }
 
-    public function posts()
-    {
-        return $this->morphedByMany('App\Models\Post', 'clientable');
-    }
-
     public function notifications()
     {
         return $this->morphedByMany('App\Models\Notification', 'clientable')->withPivot('notification_is_read');
+    }
+
+    public function orders()
+    {
+        return $this->hasMany('App\Models\Order');
     }
 
     public function cities()
@@ -39,10 +39,11 @@ class Client extends Authenticatable
         return $this->morphedByMany('App\Models\Governorate', 'clientable');
     }
 
-    public function orders()
+    public function posts()
     {
-        return $this->hasMany('App\Models\Order');
+        return $this->morphedByMany('App\Models\Post', 'clientable');
     }
+
 
     public function tokens()
     {

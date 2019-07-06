@@ -81,7 +81,7 @@ class AuthController extends Controller
            }
 
        }else{
-        return responseJson( 0 , 'Error info');
+        return responseJson( 0 , 'Error information');
        }
     }
 
@@ -113,7 +113,7 @@ class AuthController extends Controller
                 ->bcc("lamiaagamal4295@gmail.com") // mail of manager
                 ->send(new ResetPassword($user));
         
-                return responseJson( 1 , 'PLZ Check your Phone messages', [
+                return responseJson( 1 , 'PLZ Check your messages', [
                     
                     'pin_code' =>$code,
                     'mail_fails' => Mail::failures(),
@@ -135,7 +135,7 @@ class AuthController extends Controller
     {
         $validator = validator()->make($request->all() , [
             'pin_code' => 'required' ,
-            'mobile' => 'required' ,
+          //  'mobile' => 'required' ,
             'password' => 'required|confirmed' ,
         ]);
 
@@ -146,7 +146,7 @@ class AuthController extends Controller
         }
 
         $user = Client::where('pin_code' , $request->pin_code)->where('pin_code' , '!=' ,0)
-        ->where('mobile' , $request->mobile)->first();
+        ->first();
 
         if($user)
         {

@@ -9,7 +9,7 @@ class Order extends Model
 
     protected $table = 'orders';
     public $timestamps = true;
-    protected $fillable = array('name', 'age', 'quantity', 'hospital_name', 'hospital_address', 'latitude', 'longtude', 'city_id', 'mobile');
+    protected $fillable = array('name', 'age', 'quantity', 'blood_type' ,'hospital_name', 'hospital_address', 'latitude', 'longtude', 'city_id', 'mobile');
 
     public function blood_types()
     {
@@ -18,7 +18,7 @@ class Order extends Model
 
     public function notifications()
     {
-        return $this->hasOne('App\Models\Notification');
+        return $this->hasMany('App\Models\Notification');
     }
 
     public function cities()

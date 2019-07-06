@@ -99,7 +99,7 @@ function notifyByFirebase($title,$body,$tokens,$data = [])        // paramete 5 
          'Content-Type: application/json'
      );
 
- 
+ // dd($tokens);
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
     curl_setopt($ch, CURLOPT_POST, true);

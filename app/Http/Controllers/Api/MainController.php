@@ -91,7 +91,7 @@ class MainController extends Controller
         
        // dd($orderRequest);
         // find clients suitable for this order request
-        $clientsIds = $orderRequest->cities->governorates->clients()
+        $clientsIds = $orderRequest->city->governorate->clients()
         ->whereHas('blood_types',function($q) use ($request,$orderRequest){
             $q->where('blood_types.name',$orderRequest->blood_type);
         }) -> pluck('clients.id')->toArray();
@@ -117,10 +117,10 @@ class MainController extends Controller
                 ];
                 $send = notifyByFirebase($title , $body , $tokens , $data);
                 info("firebase result: " . $send);
-                dd($send);
+               // dd($send);
             }
         }
-        return responseJson( 1 ,  'تم الاضافه بنجاح ' , compact('orderRequest'));
+        return responseJson( 1 ,  'تم الاضافه بنجاح ' ,$orderRequest );
     }
 
 
@@ -129,7 +129,7 @@ class MainController extends Controller
     {
         $orders = Order::where(function($query)use ($request){
             if($request->has('governorate_id')){
-                $query->whereHas('cities',function($query)use ($request){
+                $query->whereHas('city',function($query)use ($request){
                     $query->where('governorate_id',$request->governorate_id);
                 });
             }elseif($request->has('city_id')){
@@ -139,7 +139,7 @@ class MainController extends Controller
             if($request->has('blood_type_id')){
                 $query->where('blood_type_id',$request->blood_type_id);
             }
-        })->with('cities','clients','blood_types')->latest()->paginate(10);
+        })->with('city','client','blood_type')->latest()->paginate(10);
         
         return responseJson(1, 'success', $orders);
         
@@ -149,7 +149,7 @@ class MainController extends Controller
     // donationRequest
     public function order(Request $request)
     {
-        $order= Order::with('cities' , 'clients' ,'blood_types')->find($request->order_id);
+        $order= Order::with('city' , 'client' ,'blood_type')->find($request->order_id);
 
         if(!$order) {
             return responseJson( 0 ,  'Your Request Not Found..');

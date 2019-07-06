@@ -11,7 +11,7 @@ class Order extends Model
     public $timestamps = true;
     protected $fillable = array('name', 'age', 'quantity', 'blood_type' ,'hospital_name', 'hospital_address', 'latitude', 'longtude', 'city_id', 'mobile');
 
-    public function blood_types()
+    public function blood_type()
     {
         return $this->belongsTo('App\Models\BloodType');
     }
@@ -21,12 +21,12 @@ class Order extends Model
         return $this->hasMany('App\Models\Notification');
     }
 
-    public function cities()
+    public function city()
     {
         return $this->belongsTo('App\Models\City','city_id');
     }
 
-    public function clients()
+    public function client()
     {
         return $this->belongsTo('App\Models\Client');
     }

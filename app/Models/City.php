@@ -11,7 +11,7 @@ class City extends Model
     public $timestamps = true;
     protected $fillable = array('name');
 
-    public function governorates()
+    public function governorate()
     {
         return $this->belongsTo('App\Models\Governorate','governorate_id');
     }

@@ -262,8 +262,8 @@ class MainController extends Controller
         $contact=Contacts::create($request->all());
         
         if ($contact){
-             Mail::to("blood.bank740@gmail.com")
-            ->bcc("lamiaagamal4295@gmail.com") ;// mail of manager
+            //  Mail::to("blood.bank740@gmail.com")
+            // ->bcc("lamiaagamal4295@gmail.com") ;// mail of manager
             //->send(new Contacts($contact));
 
             return responseJson(1,  'شكرا على تسجيل شكوتك' , $contact);

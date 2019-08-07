@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Governorate;
 
-
+ 
 class GovernorateController extends Controller
 {
     /**
@@ -104,9 +104,30 @@ class GovernorateController extends Controller
     public function destroy($id)
     {
         $record = Governorate::findOrFail($id);
-        $record->delete();
-        flash()->success('Deleted Successfully ..');
+        // $record->delete();
+        // flash()->success('Deleted Successfully ..');
         // return back();
-        return redirect(route('governorate.index'));
+        // return redirect(route('governorate.index'));
+
+        if (!$record) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Fail To get information'
+            ]);
+        }
+        if($record->cities()->count())
+        {
+            return response()->json([
+                    'status' => 0,
+                    'message' => 'Can not delete there is related',
+                ]);
+        }
+        $record->delete();
+        return response()->json([
+                'status'  => 1,
+                'message' =>'Deleted Successfully ..',
+                'id'      => $id
+            ]);
+    
     }
 }

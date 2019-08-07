@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request; 
 use App\Models\Order;
+use App\Models\BloodType;
+use App\Models\City;
 
 class OrderController extends Controller
 {
@@ -12,10 +14,28 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::all();
-        return view('orders.index', compact('orders'));
+        $orders = Order::where(function ($query) use($request){
+            if ($request->input('keyword'))
+            {
+                $query->where(function ($query) use($request){
+                    $query->where('name','like','%'.$request->keyword.'%');
+                    $query->orWhere('age','like','%'.$request->keyword.'%');
+                    $query->orWhere('quantity','like','%'.$request->keyword.'%');
+                    $query->orWhere('hospital_name','like','%'.$request->keyword.'%');
+                    $query->orWhere('hospital_address','like','%'.$request->keyword.'%');
+                    $query->orWhereHas('city',function ($city) use($request){
+                        $city->where('name','like','%'.$request->keyword.'%');
+                    }); 
+                });
+            }
+            if ($request->input('blood_type'))
+            {
+                $query->where('blood_type',$request->blood_type);
+            }
+        })->paginate(20);
+        return view('orders.index',compact('orders'));
     }
 
     /**
@@ -47,8 +67,7 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        $order = Order::findOrFail($id);
-        return view('orders.show', compact('order'));
+        
     }
 
     /**
@@ -59,7 +78,10 @@ class OrderController extends Controller
      */
     public function edit($id)
     {
-        //
+        $bloodtypes = BloodType::pluck('name', 'id')->toArray();
+        $cities = City::pluck('name', 'id')->toArray();
+        $model = Order::findOrFail($id);
+        return view('orders.edit', compact('model', 'bloodtypes', 'cities'));
     }
 
     /**
@@ -71,7 +93,22 @@ class OrderController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $rules = [
+            'name' => 'required',
+            'age'  => 'required',
+            'hospital_name'    => 'required',
+            'hospital_address' => 'required',
+            'quantity'  => 'required',
+            'mobile'    => 'required',
+            'blood_type'  => 'required',
+            'city_id'     => 'required',
+            // 'notes'       => 'required',
+        ];
+        $this->validate($request, $rules);
+        $record = Order::findOrFail($id);
+        $record->update($request->all());
+        flash()->success('Updated Successfully');
+        return redirect(route('order.index'));
     }
 
     /**
@@ -86,33 +123,6 @@ class OrderController extends Controller
         $order->delete();
         flash()->success('Deleted Successfully ..');
         return redirect(route('order.index'));
-    }
-
-    public function search(Request $request) {
-        $constraints = [
-            'name' => $request['name'],
-            'blood_type' => $request['blood_type'],
-            'age' => $request['age'],
-            'hospital_name' => $request['hospital_name'],
-            // 'city' => $request['city']
-            ];
-
-       $orders = $this->doSearchingQuery($constraints);
-       return view('orders.index', ['orders' => $orders, 'searchingVals' => $constraints]);
-    }
-
-    private function doSearchingQuery($constraints) {
-        $query = Order::query();
-        $fields = array_keys($constraints);
-        $index = 0;
-        foreach ($constraints as $constraint) {
-            if ($constraint != null) {
-                $query = $query->where( $fields[$index], 'like', '%'.$constraint.'%');
-            }
-
-            $index++;
-        }
-        return $query->paginate(20);
     }
 
 }

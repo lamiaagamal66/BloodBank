@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name', 'email', 'password',
     ];
 
+    protected $appends = ['roles_list'];
+    
     public function getRolesListAttribute()
     {
         return $this->roles()->pluck('id')->toArray();

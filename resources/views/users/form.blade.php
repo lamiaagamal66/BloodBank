@@ -23,12 +23,12 @@ $roles = $role->pluck('display_name', 'id')->toArray();
         'class' => 'form-control'
     ]) !!}
 </div> 
-{{-- <div class="form-group">
+<div class="form-group">
     <label for="password_confirmation">Password Confirmation</label>
     {!! Form::password('password_confirmation',[
         'class' => 'form-control'
     ]) !!}
-</div>  --}}
+</div> 
 <div class="form-group">
     <label for="roles_list">Roles</label>
     {!! Form::select('roles_list[]',$roles,null,[

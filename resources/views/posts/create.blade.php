@@ -26,7 +26,10 @@
                     @include('partials.validation_errors')
                 
                     {!! Form::model($model,[
-                        'action' => 'PostController@store'
+                        'action' => 'PostController@store',
+                        'files'=>   true,
+                        'method' => 'post',
+                        'enctype' =>'multipart/form-data'
                     ]) !!}
                     @include('posts.form')
                     {!! Form::close() !!}

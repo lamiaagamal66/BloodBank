@@ -19,17 +19,18 @@ Auth::routes();
 
 Route::group(['middleware'=>['auth', 'auto-check-permission'] , 'perfix' =>'admin'] ,function(){
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'HomeController@index')->name('home'); 
 
 Route::resource('client', 'ClientController');
-Route::post('client/search', 'ClientController@search')->name('client.search');
+// Route::post('client/search', 'ClientController@search')->name('client.search');
 Route::get('client-activate/{id}', 'ClientController@activate')->name('client.activate');
 Route::get('client-deactivate/{id}', 'ClientController@deactivate')->name('client.deactivate');
+// Route::get('client-toggleActivation/{id}', 'ClientController@toggleActivation')->name('client.toggleActivation');/
 
 Route::resource('governorate', 'GovernorateController');
 Route::resource('city', 'CityController');
 Route::resource('category', 'CategoryController');
-Route::resource('bloodType', 'BloodTypeController');
+Route::resource('bloodType', 'BloodTypeContro   ller');
 
 Route::resource('contact', 'ContactController');
 Route::post('contact/search','ContactController@search')->name('contact.search');

@@ -19,7 +19,9 @@
             <div class="card-body">
                 {!! Form::model($model,[
                     'action' =>  'UserController@store',
-                    // 'method' => 'Post'
+                    'id'=>'myForm',
+                    'role'=>'form',
+                    'method' => 'Post'
                 ]) !!}
                 @include('users.form')
                 {!! Form::close() !!}
@@ -28,5 +30,5 @@
             <!-- /.card -->
 
     </section>
-    <!-- /.content -->
+    <!-- /.content --> 
 @endsection

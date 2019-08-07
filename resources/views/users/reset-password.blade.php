@@ -20,7 +20,9 @@
                 {!! Form::open([
                     'action' => 
                         'UserController@changePasswordSave' ,
-                        'method' => 'Post'
+                        'id'=>'myForm',
+                        'role'=>'form',
+                        'method'=>'POST'
                 ]) !!}
                 <div class="form-group">
                     <label for="old-password">Current Password</label>

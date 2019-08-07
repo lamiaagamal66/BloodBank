@@ -171,7 +171,7 @@ class MainController extends Controller
     {
       //$posts= Post::with('categories')->paginate(10);
 
-        $posts= Post::with('categories')->where(function($query) use($request){
+        $posts= Post::with('category')->where(function($query) use($request){
             if($request->has('category_id'))
             {
                 $query->where('category_id', $request->category_id);
@@ -190,7 +190,7 @@ class MainController extends Controller
 
     public function post(Request $request)
     {
-        $post= Post::with('categories')->find($request->post_id);
+        $post= Post::with('category')->find($request->post_id);
         if(!$post) {
             return responseJson( 0 ,  'Your Post Not Found..');
         }
@@ -201,7 +201,7 @@ class MainController extends Controller
     // myFavourites
     public function myFavouritePosts(Request $request)
     {
-        $posts = $request-> user() ->posts()->with('categories')->latest()->paginate(10);
+        $posts = $request-> user() ->posts()->with('category')->latest()->paginate(10);
         return responseJson( 1 ,  'success' , $posts);
     }
 

@@ -53,15 +53,15 @@ class UserController extends Controller
         $users = User::paginate(10);
         return view('users.index', compact('users'));
     }
-
+ 
     /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(User $model)
     {
-        return view('users.create');
+        return view('users.create',compact('model'));
     }
 
     /**
@@ -127,30 +127,30 @@ class UserController extends Controller
     {
         $rules = [
             'name' =>'required',
-            'password' =>'required',
+            'password' =>'confirmed',
             'email' =>'email|required',
             'roles_list' =>'required',
         ];
         $messages = [
             'name.required' => 'Name is Required',
-            'password.required' => 'Password is Required',
             'email.email' => 'Enter Valid Email',
             'roles_list.required' => 'Roles List is Required'
         ];
         $this->validate($request, $rules , $messages);
         $user = User::findOrFail($id);
-        if(Hash::check($request->input('password'), $user->password))
-        {
+
+        // if(Hash::check($request->input('password'), $user->password))
+        // {
             $user->roles()->sync((array) $request->input('roles_list'));
-            // $request->merge(['password' => bcrypt($request->password)]);
+            $request->merge(['password' => bcrypt($request->password)]);
             $user->update($request->all());
             flash()->success('Updated Successfully ..');
             return redirect(route('user.index'));
 
-        }else{
-            flash()->error('Error Password');
-            return back();
-        }
+        // }else{
+        //     flash()->error('Error Password');
+        //     return back();
+        // }
         
     }
 
@@ -165,11 +165,11 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         if(!$user){
             flash()->error('fail to find info ..');
-            return redirect(route('role.index'));
+            return redirect(route('user.index'));
         }
         $user->delete();
         flash()->success('Deleted Successfully ..');
-        return redirect(route('role.index'));
+        return redirect(route('user.index'));
     }
 
     public function logout()

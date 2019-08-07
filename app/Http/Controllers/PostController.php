@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Models\Category;
+// use Intervention\Image\ImageManagerStatic as Image;
+use Image;
 
 class PostController extends Controller
 {
@@ -12,12 +15,21 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $records = Post::paginate(20);
+        $records = Post::where(function ($query) use($request){
+            if ($request->input('keyword'))
+            {
+                $query->where(function ($query) use($request){
+                    $query->orWhereHas('category',function ($category) use($request){
+                        $category->where('name','like','%'.$request->keyword.'%');
+                    }); 
+                });
+            }
+        })->paginate(20);
         return view('posts.index', compact('records'));
     }
-
+ 
     /**
      * Show the form for creating a new resource.
      *
@@ -25,7 +37,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('posts.create');
+        $categories = Category::pluck('name', 'id')->toArray();
+        return view('posts.create',compact('categories'));
     }
 
     /**
@@ -36,20 +49,35 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $rules = [
-            'title' =>'required',
-            'body' =>'required',
-            'category_id' =>'required'
-        ];
         $messages = [
             'title.required' => 'Post Title is Required',
             'body.required' => 'Post Body is Required',
-            'category_id.required' => 'Category_id is Required'
+            'category_id.required' => 'Category_id is Required',
+            'image.required' => 'image is Required',
+            'publish_date.required' => 'publish_date is Required'
         ];
+        $rules = [
+            'title' =>'required',
+            'body' =>'required',
+            'category_id' =>'required',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'publish_date' => 'required',  
+        ];
+        
         $this->validate($request, $rules , $messages);
         // dd("here");
         $record = Post::create($request->all());
 
+        if ($request->hasFile('image')) {
+            $path = public_path();
+            $destinationPath = $path . '/uploads/images/'; // upload path
+            $image = $request->file('image');
+            $extension = $image->getClientOriginalExtension(); // getting image extension
+            $name = time() . '' . rand(11111, 99999) . '.' . $extension; // renameing image
+            $image->move($destinationPath, $name); // uploading file to given path
+            $record->image = 'uploads/images/' . $name;
+        }
+        $record->save();
         flash()->success('Successfully Added..');
         return redirect(route('post.index'));
     }
@@ -87,8 +115,32 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $rules = [
+            'title' =>'required',
+            'body' =>'required',
+            'category_id' =>'required',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'publish_date' => 'required',  
+        ];
+        $messages = [
+            'title.required' => 'Post Title is Required',
+            'body.required' => 'Post Body is Required',
+            'category_id.required' => 'Category_id is Required',
+            'image.required' => 'image is Required',
+            'publish_date.required' => 'publish_date is Required'
+        ];
+        $this->validate($request, $rules , $messages);
+
         $record = Post::findOrFail($id);
         $record->update($request->all());
+
+        if($request->hasFile('image')){
+            $image = $request->file('image');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            Image::make($image)->resize(100, 100)->save( public_path('/uploads/' . $filename ) );
+            $record->image = $filename;
+                $record->save();
+            }
         flash()->success('Edited Successfully ..');
         // return back();
         return redirect(route('post.index'));
@@ -107,5 +159,5 @@ class PostController extends Controller
         flash()->success('Deleted Successfully ..');
         // return back();
         return redirect(route('post.index'));
-    }
+    } 
 }

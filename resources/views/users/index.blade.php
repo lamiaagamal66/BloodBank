@@ -15,7 +15,7 @@
                  @include('flash::message')
                  @if ('$users')
                     <div class="table-responsive">
-                        <table class="table no-margin">
+                        <table class="data-table table no-margin">
                             <thead>
                                 <tr>
                                   <th>ID</th>
@@ -24,13 +24,15 @@
                                   <th>Role</th>
                                   <th>Created at</th>
                                   <th>Updated at</th>
-                                  <th>Delete</th>
+                                  <th class="text-center">Edit</th>
+                                  <th class="text-center">Delete</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @php $count = 1; @endphp
                                 @foreach ($users as $user)      
-                                  <tr>
-                                    <td>{{$user->id}}</td>
+                                  <tr id="removable{{$user->id}}">
+                                    <td>{{$count}}</td>
                                     <td>{{$user->name}}</td>
                                     <td>{{$user->email}}</td>
                                     <td>
@@ -41,30 +43,34 @@
                                     <td>{{$user->created_at}}</td>
                                     <td>{{$user->updated_at}}</td>
                                    
-                                    {{-- <td class="text-center">
-                                        @if (Hash::check($user->email , optional(auth()->user())->email ))
+                                    <td class="text-center">
+                                        {{-- @if (Hash::check($user->email , optional(auth()->user())->email )) --}}
                                         <a href="{{url(route('user.edit' , $user->id ))}}" class="btn btn-success btn-xs">
                                         <i class="fa fa-edit"></i>
-                                            Edit
-                                        </a>
-                                        @endif
-                                         
-                                    </td> --}}
-                                    <td class="text-center"> 
-                                        {!! Form::open([
-                                            'action' => ['UserController@destroy' , $user->id],
-                                            'method' => 'delete'
-                                        ]) !!}
-                                        <button type="submit" class="btn btn-danger btn-xs">
-                                            <i class="fa fa-trash"></i>
                                             
-                                        </button>
-                                        {!! Form::close() !!}
+                                        </a>
+                                        {{-- @endif --}}
+                                         
+                                    </td> 
+                                    <td class="text-center">
+                                            {!! Form::open([
+                                                'action' => ['UserController@destroy' , $user->id],
+                                                'method' => 'delete'
+                                            ]) !!}
+                                            <button type="submit" class="btn btn-danger btn-xs">
+                                                <i class="fa fa-trash"></i>
+                                                
+                                            </button>
+                                            {!! Form::close() !!}
                                     </td> 
                                   </tr>
+                                @php $count ++; @endphp  
                                 @endforeach  
                             </tbody>       
                         </table>
+                    </div>
+                    <div class="text-center">
+                        {!! $users->render() !!}
                     </div>
                 @else
                     <div class="alert alert-danger" role="alert">

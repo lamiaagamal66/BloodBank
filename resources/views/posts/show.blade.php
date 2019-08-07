@@ -12,8 +12,8 @@
         @if ('$record')
         <h3 class="card-header">{{$record->title}}</h3>
         <div class="card-body">
-            <div> {{$record->body}} </div><br> 
-            <div>Category of : {{optional($record->categories)->name}} </div><br>
+            <div> {{$record->body}} </div><br>  
+            <div>Category of : {{optional($record->category)->name}} </div><br>
             <span class="time"><i class="fa fa-clock"></i> Created at : {{$record->created_at}}</span><br><br>
             <a href="{{url(route('post.edit' , $record->id ))}}" class="btn btn-success btn-xs">
                 <i class="fa fa-edit"></i>

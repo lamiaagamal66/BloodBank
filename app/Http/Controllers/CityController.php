@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\City;
+use App\Models\Governorate;
 
 class CityController extends Controller
 {
@@ -25,7 +26,8 @@ class CityController extends Controller
      */
     public function create()
     {
-        return view('cities.create');
+        $governorates = Governorate::pluck('name', 'id')->toArray();
+        return view('cities.create', compact('governorates'));
     }
 
     /**
@@ -46,11 +48,7 @@ class CityController extends Controller
         ];
         $this->validate($request, $rules , $messages);
         // dd("here");
-        $record = new City;
-        $record->name = $request->input('name');
-        $record->governorate_id = $request->input('governorate_id');
-        $record->save();
-
+        $record = City::create($request->all());
         flash()->success('City added Successfully ..');
         return redirect(route('city.index'));
     }
@@ -75,7 +73,8 @@ class CityController extends Controller
     public function edit($id)
     {
         $model = City::findOrFail($id);
-        return view('cities.edit', compact('model'));
+        $governorates = Governorate::pluck('name', 'id')->toArray();
+        return view('cities.edit', compact('model','governorates'));
     }
 
     /**

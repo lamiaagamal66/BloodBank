@@ -3,6 +3,7 @@
 @section('page_title')
   Edit Post   
 @endsection
+@inject('categories','App\Models\Category')
 
 @section('content')
 
@@ -21,15 +22,20 @@
             </div>
 
             <div class="card-body">
-                @include('partials.validation_errors')
+               
                  {{-- flash message --}}
                  @include('flash::message')
 
                 {!! Form::model($record,[
                     'action' => ['PostController@update' , $record->id],
-                    'method' => 'put'
+                    'method' => 'put',
+                    'files'=>   true,
                 ]) !!}
+
+                @include('partials.validation_errors')
+                <img src="<?php echo asset("uploads/$record->image")?>"/>
                 @include('posts.form')
+                
                 {!! Form::close() !!}
             </div>
 

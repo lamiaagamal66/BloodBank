@@ -195,7 +195,7 @@ class AuthController extends Controller
        }
 
        $loginUser->save();
-       $data = [ 'clients' => $request->user()->fresh()->load('cities.governorate' , 'blood_types')];
+       $data = [ 'clients' => $request->user()->fresh()->load('city.governorate' , 'blood_types')];
        return responseJson( 1 , 'تم تحديث البيانات ' , $data);
     }
 

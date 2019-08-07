@@ -16,6 +16,8 @@
                 @include('partials.validation_errors')
                 {!! Form::model($model,[
                     'action' =>  ['UserController@update' , $model->id],
+                    'id'=>'myForm',
+                    'role'=>'form',
                     'method' => 'put'
                 ]) !!}
                 @include('users.form')

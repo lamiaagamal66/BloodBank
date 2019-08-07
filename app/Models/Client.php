@@ -12,7 +12,7 @@ class Client extends Authenticatable
 
     protected $table = 'clients';
     public $timestamps = true;
-    protected $fillable = array('name', 'email', 'date_of_birth','city_id' ,'last_donate', 'mobile', 'password','blood_type','pin_code','is_active','status');
+    protected $fillable = array('name', 'email', 'date_of_birth','city_id' ,'last_donate', 'mobile', 'password','blood_type','pin_code','is_active');
 
     public function blood_types()
     {
@@ -29,7 +29,7 @@ class Client extends Authenticatable
         return $this->hasMany('App\Models\Order');
     }
 
-    public function cities()
+    public function city()
     {
         return $this->belongsTo('App\Models\City');
     }
@@ -44,6 +44,15 @@ class Client extends Authenticatable
         return $this->morphedByMany('App\Models\Post', 'clientable');
     }
 
+    // public function reports()
+    // {
+    //     return $this->hasMany('App\Models\Report');
+    // }
+
+    public function contacts()
+    {
+        return $this->hasMany('App\Models\Contacts');
+    }
 
     public function tokens()
     {

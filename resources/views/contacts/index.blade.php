@@ -25,14 +25,27 @@
                 {{-- flash message --}}
                 @include('flash::message')
 
-                <form method="POST" action="{{ route('contact.search') }}">
-                    {{ csrf_field() }}
-                    @component('layouts.search', ['title' => 'Search'])
-                        @component('layouts.two-cols-search-row', ['items' => ['Name', 'Subject'], 
-                        'oldVals' => [isset($searchingVals) ? $searchingVals['name'] : '', isset($searchingVals) ? $searchingVals['subject'] : '']])
-                        @endcomponent
-                    @endcomponent
-                </form> <br>
+                <div class="filter">
+                    {!! Form::open([
+                        'method' => 'get'
+                    ]) !!}
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                {!! Form::text('keyword',request('keyword'),[
+                                    'class' => 'form-control',
+                                    'placeholder' => 'Search name | mobile'
+                                ]) !!}
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                    {!! Form::close() !!}
+                </div> 
 
                 @if ('$reports')
                 <div class="table-responsive">
@@ -41,7 +54,7 @@
                             <tr class="text-center">
                                 <th>No</th>
                                 <th>Name</th>
-                                <th>Email</th>
+                                {{-- <th>Email</th> --}}
                                 <th>Phone</th>
                                 <th>Supject</th>
                                 <th>Message</th>
@@ -53,7 +66,7 @@
                                 <tr class="text-center">
                                     <td>{{$report->id}}</td>
                                     <td>{{$report->name}}</td>
-                                    <td>{{$report->email}}</td>
+                                    {{-- <td>{{$report->email}}</td> --}}
                                     <td>{{$report->phone}}</td>
                                     <td>{{$report->subject}}</td>
                                     <td>{{$report->message}}</td>

@@ -24,25 +24,43 @@
             <div class="card-body">
                 {{-- flash message --}}
                 @include('flash::message')
+                 <div class="filter">
+                    {!! Form::open([
+                        'method' => 'get'
+                    ]) !!}
 
-                <form method="POST" action="{{ route('client.search') }}">
-                    {{ csrf_field() }}
-                    @component('layouts.search', ['title' => 'Search'])
-                        @component('layouts.two-cols-search-row', ['items' => ['Name', 'Blood_Type'], 
-                        'oldVals' => [isset($searchingVals) ? $searchingVals['name'] : '', isset($searchingVals) ? $searchingVals['blood_type'] : '']])
-                        @endcomponent
-                        
-                        {{-- @component('layouts.two-cols-search-row', ['items' => ['City'],
-                        'oldVals' => [isset($searchingVals) ? $searchingVals['city'] : '']])
-                        @endcomponent --}}
-                   @endcomponent
-                 </form> <br>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                {!! Form::text('keyword',request('keyword'),[
+                                    'class' => 'form-control',
+                                    'placeholder' => 'Search name|Mobile|Email|City'
+                                ]) !!}
+                            </div>
+                        </div>
+                        @inject('bloodType','App\Models\BloodType')
+                        <div class="col-sm-3">
+                            {!! Form::select('blood_type',$bloodType->pluck('name','name')->toArray(),request('blood_type'),[
+                                    'class' => 'form-control',
+                                    'placeholder' => 'Search bloodType'
+                                ]) !!}
+                        </div>
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                    {!! Form::close() !!}
+                </div>
+
 
                 @if ('$clients')
                     <div class="row">
                         <div class="col-sm-12 ">
                             <table class="table no-margin table-responsive">
-                                <thead>
+                                <thead> 
                                     <tr role="row">
                                       <th >ID</th>
                                       <th >Name</th>
@@ -67,7 +85,7 @@
                                       <td>{{$client->last_donate}}</td>
                                       <td>{{$client->mobile}}</td>
                                       <td>{{$client->blood_type}}</td>
-                                      <td>{{optional($client->cities)->name}}</td>
+                                      <td>{{optional($client->city)->name}}</td>
                                       <td>
                                         @if ($client->is_active)
                                             <a href="{{url(route('client.deactivate' , $client->id ))}}" class="btn btn-warning btn-xs ">   

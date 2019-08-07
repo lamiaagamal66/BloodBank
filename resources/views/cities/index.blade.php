@@ -34,7 +34,6 @@
                                     <th>No</th>
                                     <th>Name</th>
                                     <th>Governorate</th>
-                                    <th>Governorate ID</th>
                                    <th></th>
                                    <th></th>
                                 </tr>
@@ -45,7 +44,6 @@
                                         <td>{{$record->id}}</td>
                                         <td>{{$record->name}}</td>
                                         <td>{{optional($record->governorate)->name}}</td>
-                                        <td>{{$record->governorate_id}}</td>
                                         <td>
                                             <a href="{{url(route('city.edit' , $record->id ))}}" class="btn btn-success btn-xs">
                                                 <i class="fa fa-edit"></i>

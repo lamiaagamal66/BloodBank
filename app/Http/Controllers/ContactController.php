@@ -13,9 +13,17 @@ class ContactController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $reports = Contacts::all();
+        $reports = Contacts::where(function ($query) use($request){
+            if ($request->input('keyword'))
+            {
+                $query->where(function ($query) use($request){
+                    $query->where('name','like','%'.$request->keyword.'%');
+                    $query->orwhere('mobile','like','%'.$request->keyword.'%');
+                }); 
+            }  
+        })->paginate(10);
         return view('contacts.index', compact('reports'));
     }
 
@@ -86,29 +94,5 @@ class ContactController extends Controller
         $reports->delete();
         flash()->success('Deleted Successfully ..');
         return redirect(route('contact.index'));
-    }
-
-    public function search(Request $request) {
-        $constraints = [
-            'name' => $request['name'],
-            'subject' => $request['subject']
-            ];
-
-       $reports = $this->doSearchingQuery($constraints);
-       return view('contacts.index', ['reports' => $reports, 'searchingVals' => $constraints]);
-    }
-
-    private function doSearchingQuery($constraints) {
-        $query = Contacts::query();
-        $fields = array_keys($constraints);
-        $index = 0;
-        foreach ($constraints as $constraint) {
-            if ($constraint != null) {
-                $query = $query->where( $fields[$index], 'like', '%'.$constraint.'%');
-            }
-
-            $index++;
-        }
-        return $query->paginate(5);
     }
 }
